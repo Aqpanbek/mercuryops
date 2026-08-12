@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+.env
+bin/
+coverage.out
+
+# MercuryOps is a Go-only project. These are unrelated local Node artifacts.
+node_modules/
+package.json
+package-lock.json
