@@ -3,6 +3,7 @@
 .env
 bin/
 coverage.out
+ROADMAP.md
 
 # MercuryOps is a Go-only project. These are unrelated local Node artifacts.
 node_modules/
