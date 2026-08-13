@@ -3,7 +3,12 @@ package order
 import "testing"
 
 func TestNewCreateDraftOrder(t *testing.T) {
-	got, err := New(101, 2, 3, 1500)
+	items := []OrderItem{
+		{sku: 2, quantity: 3, unitPrice: 1500},
+		{sku: 3, quantity: 1, unitPrice: 500},
+	}
+
+	got, err := New(101, items)
 
 	if err != nil {
 		t.Fatalf("не ожидали ошибку %v", err)
@@ -17,22 +22,28 @@ func TestNewCreateDraftOrder(t *testing.T) {
 		t.Errorf("ожидали id %d, получили %d", 101, got.id)
 	}
 
-	if got.sku != 2 {
-		t.Errorf("ожидали sku %d, получили %d", 2, got.sku)
+	if len(got.items) != 2 {
+		t.Fatalf("ожидали 2 позиции, получили %d", len(got.items))
 	}
 
-	if got.quantity != 3 {
-		t.Errorf("ожидали quantity %d, получили %d", 3, got.quantity)
+	if got.items[0].sku != 2 {
+		t.Errorf("ожидали sku %d, получили %d", 2, got.items[0].sku)
 	}
 
-	if got.unitPrice != 1500 {
-		t.Errorf("ожидали unitPrice %d, получили %d", 1500, got.unitPrice)
+	if got.items[0].quantity != 3 {
+		t.Errorf("ожидали quantity %d, получили %d", 3, got.items[0].quantity)
 	}
 
+	if got.items[0].unitPrice != 1500 {
+		t.Errorf("ожидали unitPrice %d, получили %d", 1500, got.items[0].unitPrice)
+	}
 }
 
 func TestNewRejectsZeroQuantity(t *testing.T) {
-	_, err := New(101, 2, 0, 1500)
+	_, err := New(101, []OrderItem{
+		{sku: 2, quantity: 1, unitPrice: 1500},
+		{sku: 3, quantity: 0, unitPrice: 500},
+	})
 
 	if err != ErrInvalidQuantity {
 		t.Errorf("ожидали ErrInvalidQuantity, получили  %v", err)
@@ -40,7 +51,7 @@ func TestNewRejectsZeroQuantity(t *testing.T) {
 }
 
 func TestNewRejectsNegativeQuantity(t *testing.T) {
-	_, err := New(101, 2, -1, 1500)
+	_, err := New(101, []OrderItem{{sku: 2, quantity: -1, unitPrice: 1500}})
 
 	if err != ErrInvalidQuantity {
 		t.Errorf("Ожидали получить ErrInvalidQuantity, получили %v", err)
@@ -48,7 +59,7 @@ func TestNewRejectsNegativeQuantity(t *testing.T) {
 }
 
 func TestNewRejectsZeroUnitPrice(t *testing.T) {
-	_, err := New(101, 2, 1, 0)
+	_, err := New(101, []OrderItem{{sku: 2, quantity: 1, unitPrice: 0}})
 
 	if err != ErrInvalidPrice {
 		t.Errorf("ожидали получить ErrInvalidPrice, получили %v", err)
@@ -56,7 +67,7 @@ func TestNewRejectsZeroUnitPrice(t *testing.T) {
 }
 
 func TestNewRejectsNegativeUnitPrice(t *testing.T) {
-	_, err := New(101, 2, 1, -1500)
+	_, err := New(101, []OrderItem{{sku: 2, quantity: 1, unitPrice: -1500}})
 
 	if err != ErrInvalidPrice {
 		t.Errorf("Ожидали получить ErrInvalidPrice, получили %v", err)
@@ -64,7 +75,7 @@ func TestNewRejectsNegativeUnitPrice(t *testing.T) {
 }
 
 func TestConfirmDraftOrder(t *testing.T) {
-	createdOrder, err := New(101, 2, 1, 1500)
+	createdOrder, err := New(101, []OrderItem{{sku: 2, quantity: 1, unitPrice: 1500}})
 
 	if err != nil {
 		t.Fatalf("не ожадила ошибку, получили %v", err)
@@ -82,7 +93,7 @@ func TestConfirmDraftOrder(t *testing.T) {
 }
 
 func TestConfirmRejectsAlreadyConfirmedOrder(t *testing.T) {
-	createdOrder, err := New(101, 2, 1, 1500)
+	createdOrder, err := New(101, []OrderItem{{sku: 2, quantity: 1, unitPrice: 1500}})
 
 	if err != nil {
 		t.Fatalf("не ожадила ошибку, получили %v", err)
@@ -109,7 +120,7 @@ func TestConfirmRejectsAlreadyConfirmedOrder(t *testing.T) {
 }
 
 func TestConfirmRejectsCancelledOrder(t *testing.T) {
-	createdOrder, err := New(101, 2, 1, 1500)
+	createdOrder, err := New(101, []OrderItem{{sku: 2, quantity: 1, unitPrice: 1500}})
 
 	if err != nil {
 		t.Fatalf("не ожидали ошибку, получили %v", err)
